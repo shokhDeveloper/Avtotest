@@ -34,7 +34,7 @@ const gameSettingsObj = {
 const gameStartSettingsObj = {
   easy: {
     type: "easy",
-    length: 5,
+    length: 21,
   },
   normal: {
     type: "normal",
