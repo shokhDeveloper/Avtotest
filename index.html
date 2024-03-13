@@ -17,6 +17,12 @@
       <img class="js-result-image" src="./images/signs/asosiy_tugash.gif" width="150" height="200" alt="">
       <div class="game__question-result hide-result">
         <img class="game__question-result-image " src="./images/checkmark.gif" width="30" alt="">
+        <audio id="gameAudio">
+          <source src="./audio/correct-answer.mp3"  type="audio/mp3">
+        </audio>
+        <audio id="gameErrorAudio">
+          <source src="./audio/wrong-answer.mp3"  type="audio/mp3">
+        </audio>
       </div>
   </li>
   </template>
@@ -79,7 +85,7 @@
         <div class="game__inner">
           <div class="game__inner-top js-game-inner-top">
             <h3 class="game__score js-score-info">Score : </h3>
-            <h3 class="game__date">Vaqt:</h3>
+            <h3 class="game__date">Vaqt: <span class="js-date-minutes"></span> : <span class="js-date-seconds"></span> </h3>
           </div>
           <div class="game__box">
             <div class="game__question-box">

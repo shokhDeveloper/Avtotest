@@ -20,6 +20,8 @@ const elLastScoreCount = document.querySelector(".js-last-score-count");
 const elLastErrorCount = document.querySelector(".js-last-error-count");
 const elLastWinBox = document.querySelector(".js-last-win")
 const elRestartBtn = document.querySelector(".js-restart-btn")
+const elDateMinutes = document.querySelector(".js-date-minutes");
+const elDateSeconds = document.querySelector(".js-date-seconds");
 let elScoretext = document.querySelector(".js-score-info");
 
 // GAME SETTINGS OBJECT
@@ -58,6 +60,8 @@ let gameScore = 0;
 
 // GAME MAX ERROR;
 let maxError = 5;
+
+let gameMinute = 0;
 
 // GAME SCORE TEXTCONTENT
 elScoretext.textContent = `Score : ${gameScore} `;
@@ -163,12 +167,15 @@ const handleToCheckSectionRemove = (removeSection) => {
   }
 };
 
+
 // GAME SETTINGS FUNCTION
 function handleGameSettings() {
   if (game) {
     if (Object.keys(game).length == 2 && game.gameType && game.date) {
       handleToCheckSectionRemove(elStartSection);
       handleToCheckSectionRemove(elSettingsSection);
+      gameMinute = game.date
+      handleCreateDate()
       if (elGameSection.getAttribute("class").includes("remove-section")) {
         elGameSection.classList.remove("remove-section");
       }
@@ -180,6 +187,33 @@ function handleGameSettings() {
 }
 let questionIndex = 0;
 
+function handleCreateDate  () {
+  gameMinute = +gameMinute > 0 ? +gameMinute: 0;
+  let seconds = 60;
+  if(gameMinute){
+  let interval = setInterval(() => {
+      if(gameMinute > 0){
+        if(seconds > 1){
+          seconds -= 1
+        }else{
+          gameMinute -=1
+          if(gameMinute == 0){
+            seconds = 0
+          }else{
+            seconds = 60
+          }
+        }
+        elDateMinutes.textContent = gameMinute.toString().padStart(2, "0");
+        elDateSeconds.textContent = seconds.toString().padStart(2, "0")
+      }else{
+        clearInterval(interval)
+        elDateMinutes.textContent = "00";
+        elDateSeconds.textContent = "00"
+        handleEndFn(true)
+      }
+    }, 1000)
+  }
+}
 
 // CREATE QUESTION FUNCTION
 const handleCreateQuestion = () => {
@@ -257,6 +291,8 @@ const handleScroll = () => {
 const handleTrueResponse = (questionBox, item) => {
   questionBox.classList.add("show-result");
   questionBox.querySelector("img").src = "./images/checkmark.gif";
+  let gameAudio = questionBox.querySelector("#gameAudio")
+  gameAudio.play()
   setTimeout(() => {
     item.style.opacity = 0;
   }, 2000);
@@ -266,6 +302,9 @@ const handleTrueResponse = (questionBox, item) => {
 const handleErrorResponse = (questionBox, item) => {
   questionBox.classList.add("show-result");
   questionBox.querySelector("img").src = "./images/error.png";
+  let gameAudio = questionBox.querySelector("#gameErrorAudio")
+
+  gameAudio.play()
   item.classList.add("animation-error-response");
   setTimeout(() => {
     questionBox.classList.remove("show-result");
@@ -291,26 +330,30 @@ const handleToCheckAnswer = (id, type) => {
 // GAME CONTROLS FUNCTION
 let userError = 0;
 const handleClick = (evt) => {
-  const id = evt.target.dataset.id;
-  if (Number(id) || id == 0) {
-    if (maxError > userError) {
-      let defaultRoadySymbol = roadSymbol.find((item) => item.id == id);
-      let responseRoadySymbol = result.find(
-        (item) => item.symbol_title == elQuestionInfo.textContent
-      );
-      if (responseRoadySymbol.id == defaultRoadySymbol.id) {
-        gameScore += 1;
-        questionIndex += 1;
-        handleCreateQuestion();
-        handleToCheckAnswer(id, true);
+  if(gameMinute > 0){
+    const id = evt.target.dataset.id;
+    if (Number(id) || id == 0) {
+      if (maxError > userError) {
+        let defaultRoadySymbol = roadSymbol.find((item) => item.id == id);
+        let responseRoadySymbol = result.find(
+          (item) => item.symbol_title == elQuestionInfo.textContent
+        );
+        if (responseRoadySymbol.id == defaultRoadySymbol.id) {
+          gameScore += 1;
+          questionIndex += 1;
+          handleCreateQuestion();
+          handleToCheckAnswer(id, true);
+        } else {
+          handleToCheckAnswer(id, false);
+          userError += 1;
+        }
+        elScoretext.textContent = `Score : ${gameScore}`;
       } else {
-        handleToCheckAnswer(id, false);
-        userError += 1;
+        handleEndFn(true);
       }
-      elScoretext.textContent = `Score : ${gameScore}`;
-    } else {
-      handleEndFn(true);
     }
+  }else{
+    handleEndFn(true)
   }
 };
 
